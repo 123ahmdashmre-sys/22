@@ -96,18 +96,31 @@ async function loadCustomerData(customer) {
 
     document.getElementById('cBalance').innerText = balance.toLocaleString() + ' ' + (customer.currency || 'IQD');
     
+    // منطق التنبيه المحسن
     if(trans.length > 0 && balance > 0) {
+        // ترتيب التواريخ من الأحدث للأقدم
         trans.sort((a,b)=> new Date(b.date)-new Date(a.date));
-        const lastDate = trans[0].date;
-        const diff = Math.ceil(Math.abs(new Date() - new Date(lastDate)) / (1000 * 60 * 60 * 24));
-        if(diff > (customer.reminderDays || 30)) {
-            document.getElementById('paymentAlert').classList.remove('hidden');
-            if(typeof gsap !== 'undefined') gsap.from("#paymentAlert", { x: -20, duration: 0.5, ease: "elastic" });
+        
+        const lastDate = new Date(trans[0].date);
+        const now = new Date();
+        
+        if(!isNaN(lastDate)) {
+            const diffTime = Math.abs(now - lastDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            // التأكد من أن القيمة رقمية
+            const reminderLimit = parseInt(customer.reminderDays || 30);
+
+            if(diffDays >= reminderLimit) {
+                document.getElementById('paymentAlert').classList.remove('hidden');
+                if(typeof gsap !== 'undefined') gsap.from("#paymentAlert", { x: -20, duration: 0.5, ease: "elastic" });
+            }
         }
     }
 
     const list = document.getElementById('cTransList');
     list.innerHTML = '';
+    // إعادة الترتيب للعرض
     trans.sort((a,b) => new Date(b.date) - new Date(a.date));
     
     if(trans.length === 0) list.innerHTML = '<p style="text-align:center">لا توجد عمليات</p>';
@@ -121,7 +134,7 @@ async function loadCustomerData(customer) {
         
         div.innerHTML = `
             <div><strong>${typeName}</strong> <small>${t.item || ''}</small><br><small style="color:#888">${t.date}</small></div>
-            <strong style="color:${color}">${t.amount.toLocaleString()}</strong>
+            <strong style="color:${color}">${parseFloat(t.amount).toLocaleString()}</strong>
         `;
         list.appendChild(div);
     });
