@@ -1,11 +1,11 @@
 export const firebaseConfig = {
-    apiKey: "AIzaSyCGVuftvCWX8psK9-GnMIFUbK8hYIpl36s",
-    authDomain: "sedkrar-1c800.firebaseapp.com",
-    projectId: "sedkrar-1c800",
-    storageBucket: "sedkrar-1c800.firebasestorage.app",
-    messagingSenderId: "984266925049",
-    appId: "1:984266925049:web:bfe5fd2a4e4cfd2c9c5328"
-};
+    apiKey: "AIzaSyAm5IlaB-U9yIJGQx215shIpGFrRI6xBbc",
+    authDomain: "ghjkl-41d1e.firebaseapp.com",
+    projectId: "ghjkl-41d1e",
+    storageBucket: "ghjkl-41d1e.firebasestorage.app",
+    messagingSenderId: "379737152144",
+    appId: "1:379737152144:web:2112186683b02c705d1615"
+  };
 
 export const hashPass = str => {
     let hash = 0;
