@@ -1,4 +1,4 @@
-const CACHE_NAME = 'debt-customer-v6';
+const CACHE_NAME = 'debt-customer-v7';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
