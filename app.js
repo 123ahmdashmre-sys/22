@@ -88,20 +88,34 @@ async function loadCustomerData(customer) {
     const transSnap = await getDocs(transQ);
     const trans = transSnap.docs.map(d => d.data());
     
+    // ترتيب الحركات من الأقدم للأحدث لمعالجة التصفير بشكل صحيح
+    trans.sort((a,b) => new Date(a.date) - new Date(b.date));
+
     let balance = 0;
+    let activeCustomerTrans = [];
+
     trans.forEach(t => {
-        if (t.type === 'debt' || t.type === 'sale') balance += parseFloat(t.amount);
-        else balance -= parseFloat(t.amount);
+        const amt = parseFloat(t.amount) || 0;
+        if (t.type === 'debt' || t.type === 'sale') balance += amt;
+        else balance -= amt;
+
+        activeCustomerTrans.push(t);
+
+        // التعديل المطلوب: تصفير الأرشيف بصرياً عند سداد كامل الدين
+        if (balance <= 0) {
+            balance = 0;
+            activeCustomerTrans = [];
+        }
     });
 
     document.getElementById('cBalance').innerText = balance.toLocaleString() + ' ' + (customer.currency || 'IQD');
     
     // منطق التنبيه المحسن
-    if(trans.length > 0 && balance > 0) {
+    if(activeCustomerTrans.length > 0 && balance > 0) {
         // ترتيب التواريخ من الأحدث للأقدم
-        trans.sort((a,b)=> new Date(b.date)-new Date(a.date));
+        activeCustomerTrans.sort((a,b)=> new Date(b.date)-new Date(a.date));
         
-        const lastDate = new Date(trans[0].date);
+        const lastDate = new Date(activeCustomerTrans[0].date);
         const now = new Date();
         
         if(!isNaN(lastDate)) {
@@ -120,12 +134,12 @@ async function loadCustomerData(customer) {
 
     const list = document.getElementById('cTransList');
     list.innerHTML = '';
-    // إعادة الترتيب للعرض
-    trans.sort((a,b) => new Date(b.date) - new Date(a.date));
+    // إعادة الترتيب للعرض من الأحدث للأقدم
+    activeCustomerTrans.sort((a,b) => new Date(b.date) - new Date(a.date));
     
-    if(trans.length === 0) list.innerHTML = '<p style="text-align:center">لا توجد عمليات</p>';
+    if(activeCustomerTrans.length === 0) list.innerHTML = '<p style="text-align:center">لا توجد عمليات</p>';
 
-    trans.forEach(t => {
+    activeCustomerTrans.forEach(t => {
         const div = document.createElement('div');
         div.className = 'trans-item flex flex-between';
         div.style.borderBottom = '1px solid #eee';
